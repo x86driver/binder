@@ -11,27 +11,31 @@
 
 namespace android {
 
-class IGpsService : public IInterface {
-public:
+    class IGpsdService : public IInterface {
+    public:
 
-        DECLARE_META_INTERFACE(GpsService);
-        virtual String16 getInterfaceDescriptor();
-};
-
-class BnGpsService : public BnInterface<IGpsService> {
-public:
-
-    enum {
-        GET_GPS = IBinder::FIRST_CALL_TRANSACTION + 0
+        DECLARE_META_INTERFACE(GpsdService);
     };
 
-    static void instantiate();
+    class BnGpsdService : public BnInterface<IGpsdService> {
+    public:
 
-    virtual status_t onTransact(uint32_t code,
-                                const Parcel &data,
-                                Parcel *reply,
-                                uint32_t flags);
+        enum {
+            GET_GPS = IBinder::FIRST_CALL_TRANSACTION + 0
+        };
 
-};
+        BnGpsdService();
+        virtual ~BnGpsdService();
+
+        static void instantiate();
+
+        virtual status_t onTransact(uint32_t code,
+                                    const Parcel &data,
+                                    Parcel *reply,
+                                    uint32_t flags);
+
+    };
+
+};  // namespace android
 
 #endif

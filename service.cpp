@@ -1,34 +1,66 @@
 #include <stdio.h>
+#include <utils/Log.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
+
+#include <string.h>
+#include <cutils/atomic.h>
+#include <utils/Errors.h>
+#include <binder/IServiceManager.h>
+#include <utils/String16.h>
+
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
+
 #include "service.h"
 
-String16 IGpsService::getInterfaceDescriptor()
+namespace android {
+
+const String16 IGpsdService::descriptor("com.garmin.android.gpsd.service");
+
+const String16 &IGpsdService::getInterfaceDescriptor() const
 {
-    return String16("com.garmin.android.gpsd.service");
+    return descriptor;
 }
 
-void BnGpsService::instantiate()
+IGpsdService::IGpsdService()
 {
-    static BnGpsService obj;
+}
 
-    defaultServiceManager()->addService(IGpsService::descriptor, &obj);
+IGpsdService::~IGpsdService()
+{
+}
+
+void BnGpsdService::instantiate()
+{
+    static BnGpsdService obj;
+
+    defaultServiceManager()->addService(IGpsdService::descriptor, &obj);
 
 }
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return android::PERMISSION_DENIED;              \
-        } } while (0)
+BnGpsdService::BnGpsdService()
+{
+}
 
-status_t BnGpsService::onTransact(uint32_t code,
+BnGpsdService::~BnGpsdService()
+{
+}
+
+status_t BnGpsdService::onTransact(uint32_t code,
                                   const Parcel &data,
                                   Parcel *reply,
                                   uint32_t flags)
 {
     switch (code) {
         case GET_GPS:
-            CHECK_INTERFACE(IGpsService, data, reply);
-            const char *str = data.readCString();
+            CHECK_INTERFACE(IGpsdService, data, reply);
+            const char *str;
+            str = data.readCString();
             printf("hello: %s\n", str);
             reply->writeInt32(123);
             return android::NO_ERROR;
@@ -40,4 +72,15 @@ status_t BnGpsService::onTransact(uint32_t code,
     }
 
     return android::NO_ERROR;
+}
+
+};  // namespace android
+
+int main()
+{
+    android::BnGpsdService::instantiate();
+    android::ProcessState::self()->startThreadPool();
+    android::IPCThreadState::self()->joinThreadPool();
+
+    return 0;
 }
