@@ -17,10 +17,11 @@
 #include <binder/IServiceManager.h>
 
 #include "service.h"
+#include "name.h"
 
 namespace android {
 
-const String16 IGpsdService::descriptor("com.garmin.android.gpsd.service");
+const String16 IGpsdService::descriptor(GPSD_SERVICE_NAME);
 
 const String16 &IGpsdService::getInterfaceDescriptor() const
 {
