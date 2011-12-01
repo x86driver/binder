@@ -11,10 +11,13 @@
 
 namespace android {
 
+    class IGpsdClient;
+
     class IGpsdService : public IInterface {
     public:
 
         DECLARE_META_INTERFACE(GpsdService);
+        virtual void hello(sp<IGpsdClient> aListener) = 0;
     };
 
     class BnGpsdService : public BnInterface<IGpsdService> {
@@ -34,8 +37,16 @@ namespace android {
                                     Parcel *reply,
                                     uint32_t flags);
 
+        virtual void hello(sp<IGpsdClient> aListener) {}//存東西
     };
 
+    class BpGpsdService : public BpInterface<IGpsdService> {
+    public:
+        BpGpsdService(const sp<IBinder>& impl)
+            : BpInterface<IGpsdService>(impl)
+        {}
+        void hello(sp<IGpsdClient> aListener);
+    };
 };  // namespace android
 
 #endif

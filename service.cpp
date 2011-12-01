@@ -17,10 +17,12 @@
 #include <binder/IServiceManager.h>
 
 #include "service.h"
+#include "client.h"
 #include "name.h"
 
 namespace android {
 
+/*
 const String16 IGpsdService::descriptor(GPSD_SERVICE_NAME);
 
 const String16 &IGpsdService::getInterfaceDescriptor() const
@@ -35,6 +37,7 @@ IGpsdService::IGpsdService()
 IGpsdService::~IGpsdService()
 {
 }
+*/
 
 void BnGpsdService::instantiate()
 {
@@ -57,13 +60,16 @@ status_t BnGpsdService::onTransact(uint32_t code,
                                   Parcel *reply,
                                   uint32_t flags)
 {
+    sp<IGpsdClient> listener;
+    printf("%s called, code: %d\n", __FUNCTION__, code);
+
     switch (code) {
         case GET_GPS:
             CHECK_INTERFACE(IGpsdService, data, reply);
-            const char *str;
-            str = data.readCString();
-            printf("hello: %s\n", str);
-            reply->writeInt32(123);
+            listener = interface_cast<IGpsdClient>(data.readStrongBinder());
+            listener->onChanged(234);
+//            listener->show();
+//            reply->writeInt32(EX_NO_ERROR);
             return android::NO_ERROR;
 
             break;
@@ -75,13 +81,15 @@ status_t BnGpsdService::onTransact(uint32_t code,
     return android::NO_ERROR;
 }
 
-};  // namespace android
-
-int main()
+void BpGpsdService::hello(sp<IGpsdClient> aListener)
 {
-    android::BnGpsdService::instantiate();
-    android::ProcessState::self()->startThreadPool();
-    android::IPCThreadState::self()->joinThreadPool();
-
-    return 0;
+    android::Parcel data, reply;
+    android::String16 name(GPSD_SERVICE_NAME);
+    data.writeInterfaceToken(name);
+    data.writeStrongBinder(aListener->asBinder());
+    remote()->transact(BnGpsdService::GET_GPS, data, &reply);
 }
+
+IMPLEMENT_META_INTERFACE(GpsdService, GPSD_SERVICE_NAME);
+
+};  // namespace android

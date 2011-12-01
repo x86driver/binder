@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := service.cpp
+LOCAL_SRC_FILES := service.cpp gpsclient.cpp myservice.cpp
 
 LOCAL_MODULE := service
 
@@ -12,13 +12,13 @@ LOCAL_MODULE := service
 LOCAL_SHARED_LIBRARIES += liblog
 LOCAL_SHARED_LIBRARIES += libutils libui
 
-LOCAL_CFLAGS += -Idalvik/libnativehelper/include/nativehelper
+LOCAL_CFLAGS += -Idalvik/libnativehelper/include/nativehelper -O0 -g
 
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := client.cpp
+LOCAL_SRC_FILES := service.cpp client.cpp gpsclient.cpp
 
 LOCAL_MODULE := client
 
@@ -28,7 +28,7 @@ LOCAL_MODULE := client
 LOCAL_SHARED_LIBRARIES += liblog
 LOCAL_SHARED_LIBRARIES += libutils libui
 
-LOCAL_CFLAGS += -Idalvik/libnativehelper/include/nativehelper
+LOCAL_CFLAGS += -Idalvik/libnativehelper/include/nativehelper -O0 -g
 
 include $(BUILD_EXECUTABLE)
 
